@@ -9,7 +9,7 @@ import (
 )
 
 func EnableCookieSession() gin.HandlerFunc {
-	store := cookie.NewStore([]byte("storage"))
+	store := cookie.NewStore([]byte("4238uihfieh49r3453kjdfg"))
 	return sessions.Sessions("ws-chat", store)
 }
 
