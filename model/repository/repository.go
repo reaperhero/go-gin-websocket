@@ -3,6 +3,7 @@ package repository
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/reaperhero/go-gin-websocket/model"
 	"github.com/reaperhero/go-gin-websocket/utils"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -13,15 +14,17 @@ var (
 )
 
 type Repository interface {
+	SaveUser(username, password, avatar_id string) error
+	FindUserById(username string) model.User
 }
 
 type dbRepository struct {
-	db *sqlx.DB
+	repo *sqlx.DB
 }
 
 func init() {
 	databaseHost := utils.GetEnvWithDefault("DBHOST", "127.0.0.1")
-	databaseName := utils.GetEnvWithDefault("DBNAME", "chat")
+	databaseName := utils.GetEnvWithDefault("DBNAME", "ws")
 	databaseUser := utils.GetEnvWithDefault("DBUSER", "root")
 	databasePort := utils.GetEnvWithDefault("DBPORT", "3306")
 	databasePass := utils.GetEnvWithDefault("DBPASS", "123456")
@@ -44,6 +47,6 @@ func init() {
 
 func NewRepository() Repository {
 	return &dbRepository{
-		db: db,
+		repo: db,
 	}
 }

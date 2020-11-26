@@ -2,24 +2,82 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/reaperhero/go-gin-websocket/middleware"
 	"github.com/reaperhero/go-gin-websocket/model"
+	"github.com/reaperhero/go-gin-websocket/utils"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func (h *handler) test(context *gin.Context) {
-
+func (h *handler) index(c *gin.Context) {
+	userinfo := middleware.GetSessionUserInfo(c)
+	if userinfo != nil {
+		c.Redirect(http.StatusFound, "/user/home")
+		return
+	}
+	c.HTML(http.StatusOK, "login.html", gin.H{
+		"OnlineUserCount": 10,
+	})
+	return
 }
 
-func (h *handler) index(c *gin.Context) {
-
-	c.HTML(http.StatusOK, "index.html", gin.H{})
+func (h *handler) home(c *gin.Context) {
+	if middleware.HasSession(c) {
+		logrus.WithField("session", true)
+	}
+	userinfo := middleware.GetSessionUserInfo(c)
+	rooms := []map[string]interface{}{
+		{"id": 1, "num": 1},
+		{"id": 2, "num": 2},
+		{"id": 3, "num": 3},
+		{"id": 4, "num": 4},
+		{"id": 5, "num": 5},
+		{"id": 6, "num": 6},
+	}
+	logrus.Println(*userinfo, rooms)
+	c.JSON(200, "ok")
+	return
+	//c.HTML(http.StatusOK, "index.html", gin.H{
+	//	"rooms":     rooms,
+	//	"user_info": userinfo,
+	//})
 }
 
 func (h *handler) userRegister(c *gin.Context) {
 	var u model.User
 	if err := c.ShouldBind(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1001, "msg": err.Error()})
 		return
 	}
-	c.HTML(http.StatusOK, "index.html", gin.H{})
+	h.usecase.SaveUser(u)
+	c.JSON(http.StatusOK, "ok")
+}
+
+func (h *handler) userLogin(c *gin.Context) {
+	var u model.User
+	if err := c.ShouldBind(&u); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1001, "msg": err.Error()})
+		return
+	}
+	user := h.usecase.FindUserByName(u.Username)
+	if user.Username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1002, "msg": "用户不存在"})
+		return
+	}
+	if !utils.CompareHashAndPassword(user.Password, u.Password) {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1003, "msg": "密码错误"})
+		return
+	}
+	middleware.SaveAuthSession(c, u)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 1000,
+		"msg":  "",
+	})
+	return
+}
+
+func (h *handler) userLogout(c *gin.Context) {
+	middleware.ClearAuthSession(c)
+	c.Redirect(http.StatusFound, "/")
+	return
 }

@@ -2,41 +2,35 @@ package middleware
 
 import (
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/reaperhero/go-gin-websocket/model"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 )
 
-func EnableCookieSession() gin.HandlerFunc {
-	store := cookie.NewStore([]byte("4238uihfieh49r3453kjdfg"))
-	return sessions.Sessions("ws-chat", store)
-}
-
-// 注册和登陆时都需要保存seesion信息
-func SaveAuthSession(c *gin.Context, info interface{}) {
+func SaveAuthSession(c *gin.Context, info interface{}) { // info不能为struct
 	session := sessions.Default(c)
 	session.Set("uid", info)
-	// c.SetCookie("user_id",string(info.(map[string]interface{})["b"].(uint)), 1000, "/", "localhost", false, true)
-	session.Save()
+	err := session.Save()
+	if err != nil {
+		logrus.WithField("[SaveAuthSession]:", err).Info(err)
+	}
 }
 
-func GetSessionUserInfo(c *gin.Context) map[string]interface{} {
+func GetSessionUserInfo(c *gin.Context) *model.User {
 	session := sessions.Default(c)
 
 	uid := session.Get("uid")
-
-	data := make(map[string]interface{})
-	if uid != nil {
-		//user := models.FindUserByField("id", uid.(string))
-		//data["uid"] = user.ID
-		//data["username"] = user.Username
-		//data["avatar_id"] = user.AvatarId
+	user, ok := uid.(model.User)
+	logrus.WithField("user", user).Info("[session GetSessionUserInfo]")
+	if !ok {
+		logrus.WithField("session", user).Info("session nil")
+		return nil
 	}
-	return data
+	return &user
 }
 
-// 退出时清除session
 func ClearAuthSession(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
@@ -55,6 +49,7 @@ func AuthSessionMiddle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 		sessionValue := session.Get("uid")
+		logrus.Println(sessionValue)
 		if sessionValue == nil {
 			c.Redirect(http.StatusFound, "/")
 			return
@@ -67,7 +62,6 @@ func AuthSessionMiddle() gin.HandlerFunc {
 			return
 		}
 
-		// 设置简单的变量
 		c.Set("uid", sessionValue)
 
 		c.Next()
