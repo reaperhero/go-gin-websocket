@@ -22,9 +22,6 @@ func (h *handler) index(c *gin.Context) {
 }
 
 func (h *handler) home(c *gin.Context) {
-	if middleware.HasSession(c) {
-		logrus.WithField("session", true)
-	}
 	userinfo := middleware.GetSessionUserInfo(c)
 	rooms := []map[string]interface{}{
 		{"id": 1, "num": 1},
@@ -34,13 +31,12 @@ func (h *handler) home(c *gin.Context) {
 		{"id": 5, "num": 5},
 		{"id": 6, "num": 6},
 	}
-	logrus.Println(*userinfo, rooms)
-	c.JSON(200, "ok")
+	logrus.Println(userinfo, rooms)
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"rooms":     rooms,
+		"user_info": userinfo,
+	})
 	return
-	//c.HTML(http.StatusOK, "index.html", gin.H{
-	//	"rooms":     rooms,
-	//	"user_info": userinfo,
-	//})
 }
 
 func (h *handler) userRegister(c *gin.Context) {
@@ -69,10 +65,7 @@ func (h *handler) userLogin(c *gin.Context) {
 		return
 	}
 	middleware.SaveAuthSession(c, u)
-	c.JSON(http.StatusOK, gin.H{
-		"code": 1000,
-		"msg":  "",
-	})
+	c.JSON(http.StatusOK, gin.H{"code": 1000, "msg": "登陆成功"})
 	return
 }
 
