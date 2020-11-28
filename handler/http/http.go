@@ -40,6 +40,7 @@ func RegisterHttpHandler(engine *gin.Engine, usecase usecase.Usecase) {
 		user := home.Group("/user", middleware.AuthSessionMiddle())
 		{
 			user.GET("/home", handler.home)
+			user.GET("/room/:room_id", handler.room)
 		}
 	}
 }

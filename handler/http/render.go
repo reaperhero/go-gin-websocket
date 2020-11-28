@@ -74,3 +74,12 @@ func (h *handler) userLogout(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 	return
 }
+
+func (h *handler) room(c *gin.Context) {
+	roomId := c.Param("room_id")
+	userInfo := middleware.GetSessionUserInfo(c)
+	c.HTML(http.StatusOK, "room.html", gin.H{
+		"user_info": userInfo,
+		"room_id":   roomId,
+	})
+}

@@ -23,7 +23,6 @@ func GetSessionUserInfo(c *gin.Context) *model.User {
 	uid := session.Get("uid")
 	user, ok := uid.(model.User)
 	if !ok {
-		logrus.WithField("session", user).Info("session nil")
 		return nil
 	}
 	return &user
