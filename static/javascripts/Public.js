@@ -48,23 +48,23 @@ function WebSocketConnect(userInfo,toUserInfo = null) {
 			//console.log("send_data 发送数据", send_data)
 		};
 
-		// if ( toUserInfo )
-		// {
-		// 	let to_user_send_data = JSON.stringify({
-		// 		"status": toUserInfo ? 5 : 1,
-		// 		"data": {
-		// 			"uid": toUserInfo.uid,
-		// 			"room_id": toUserInfo.room_id,
-		// 			"avatar_id": toUserInfo.avatar_id,
-		// 			"username": toUserInfo.username,
-		// 			"to_user": toUserInfo
-		// 		}
-		// 	})
-		// 	ws.onopen = function () {
-		// 		ws.send(to_user_send_data);
-		// 		console.log("to_user_send_data 发送数据", to_user_send_data)
-		// 	};
-		// }
+		if ( toUserInfo )
+		{
+			let to_user_send_data = JSON.stringify({
+				"status": toUserInfo ? 5 : 1,
+				"data": {
+					"uid": toUserInfo.uid,
+					"room_id": toUserInfo.room_id,
+					"avatar_id": toUserInfo.avatar_id,
+					"username": toUserInfo.username,
+					"to_user": toUserInfo
+				}
+			})
+			ws.onopen = function () {
+				ws.send(to_user_send_data);
+				console.log("to_user_send_data 发送数据", to_user_send_data)
+			};
+		}
 
 
 		let chat_info = $('.main .chat_info')
