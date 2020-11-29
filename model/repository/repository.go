@@ -14,8 +14,9 @@ var (
 )
 
 type Repository interface {
-	SaveUser(username, password, avatar_id string) error
+	SaveUser(username, password, avatarId string) error
 	FindUserById(username string) model.User
+	GetMessageByRoomId(roomId string, offset int) []interface{}
 }
 
 type dbRepository struct {

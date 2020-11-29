@@ -22,7 +22,7 @@ func (h *handler) index(c *gin.Context) {
 }
 
 func (h *handler) home(c *gin.Context) {
-	userinfo := middleware.GetSessionUserInfo(c)
+	users := middleware.GetSessionUserInfo(c)
 	rooms := []map[string]interface{}{
 		{"id": 1, "num": 1},
 		{"id": 2, "num": 2},
@@ -31,10 +31,9 @@ func (h *handler) home(c *gin.Context) {
 		{"id": 5, "num": 5},
 		{"id": 6, "num": 6},
 	}
-	logrus.Println(userinfo, rooms)
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"rooms":     rooms,
-		"user_info": userinfo,
+		"user_info": users,
 	})
 	return
 }
@@ -45,8 +44,17 @@ func (h *handler) userRegister(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1001, "msg": err.Error()})
 		return
 	}
-	h.usecase.SaveUser(u)
-	c.JSON(http.StatusOK, "ok")
+	if err := h.usecase.SaveUser(u); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 1002,
+			"msg":  "用户已经存在",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 1001,
+		"msg":  "注册成功",
+	})
 }
 
 func (h *handler) userLogin(c *gin.Context) {
@@ -78,8 +86,15 @@ func (h *handler) userLogout(c *gin.Context) {
 func (h *handler) room(c *gin.Context) {
 	roomId := c.Param("room_id")
 	userInfo := middleware.GetSessionUserInfo(c)
+	messageList := h.usecase.GetMessageByRoomId(roomId)
+	for i, i2 := range messageList {
+		logrus.Println(i, i2)
+	}
+	c.JSON(200, messageList)
+	return
 	c.HTML(http.StatusOK, "room.html", gin.H{
-		"user_info": userInfo,
-		"room_id":   roomId,
+		"user_info":   userInfo,
+		"room_id":     roomId,
+		"messagelist": messageList,
 	})
 }

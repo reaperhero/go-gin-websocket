@@ -19,8 +19,6 @@ type handler struct {
 	usecase usecase.Usecase
 }
 
-
-
 func RegisterHttpHandler(engine *gin.Engine, usecase usecase.Usecase) {
 	engine.LoadHTMLGlob("views/*")
 	engine.Static("/static", "./static")
@@ -37,13 +35,13 @@ func RegisterHttpHandler(engine *gin.Engine, usecase usecase.Usecase) {
 		home.GET("/", handler.index)
 		home.POST("/user/register", handler.userRegister)
 		home.POST("/user/login", handler.userLogin)
-		home.GET("/user/logout", handler.userLogout)
-		home.GET("/ws", handler.wsHandler)
 
 		user := home.Group("/user", middleware.AuthSessionMiddle())
 		{
+			user.GET("/logout", handler.userLogout)
 			user.GET("/home", handler.home)
 			user.GET("/room/:room_id", handler.room)
+			home.GET("/ws", handler.wsHandler)
 		}
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"go-gin-chat/models"
 	"log"
 	"net/http"
 	"strconv"
@@ -20,35 +19,23 @@ type msg struct {
 }
 
 type wsClients struct {
-	Conn *websocket.Conn `json:"conn"`
-
-	RemoteAddr string `json:"remote_addr"`
-
-	Uid float64 `json:"uid"`
-
-	Username string `json:"username"`
-
-	RoomId string `json:"room_id"`
-
-	AvatarId string `json:"avatar_id"`
+	Conn       *websocket.Conn `json:"conn"`
+	RemoteAddr string          `json:"remote_addr"`
+	Uid        float64         `json:"uid"`
+	Username   string          `json:"username"`
+	RoomId     string          `json:"room_id"`
+	AvatarId   string          `json:"avatar_id"`
 }
 
 var (
 	wsUpgrader = websocket.Upgrader{}
 	clientMsg  = msg{}
-
-	mutex = sync.Mutex{}
-
-	//rooms = [roomCount + 1][]wsClients{}
-	rooms = make(map[int][]wsClients)
-
+	mutex      = sync.Mutex{}
+	rooms      = make(map[int][]wsClients)
 	enterRooms = make(chan wsClients)
-
-	sMsg = make(chan msg)
-
-	offline = make(chan *websocket.Conn)
-
-	chNotify = make(chan int, 1)
+	sMsg       = make(chan msg)
+	offline    = make(chan *websocket.Conn)
+	chNotify   = make(chan int, 1)
 )
 
 const msgTypeOnline = 1        // 上线
@@ -63,18 +50,17 @@ func (h *handler) wsHandler(c *gin.Context) {
 	wsContext, _ := wsUpgrader.Upgrade(c.Writer, c.Request, nil)
 	defer wsContext.Close()
 
-	go read(wsContext)
-	go write()
+	go handleRead(wsContext)
+	go handleWrite()
 
 	select {}
 }
 
-func read(c *websocket.Conn) {
+func handleRead(c *websocket.Conn) {
 
 	defer func() {
-		//捕获read抛出的panic
 		if err := recover(); err != nil {
-			logrus.Println("read发生错误", err)
+			logrus.Println("[handleRead] ", err)
 		}
 	}()
 
@@ -96,7 +82,6 @@ func read(c *websocket.Conn) {
 		}
 
 		json.Unmarshal(message, &clientMsg)
-		// log.Println("来自客户端的消息", clientMsg,c.RemoteAddr())
 		if clientMsg.Data != nil {
 			if clientMsg.Status == msgTypeOnline { // 进入房间，建立连接
 				roomId, _ := getRoomId()
@@ -117,12 +102,11 @@ func read(c *websocket.Conn) {
 	}
 }
 
-func write() {
+func handleWrite() {
 
 	defer func() {
-		//捕获write抛出的panic
 		if err := recover(); err != nil {
-			log.Println("write发生错误", err)
+			log.Println("[handleWrite]", err)
 		}
 	}()
 
@@ -260,20 +244,22 @@ func formatServeMsgStr(status int, conn *websocket.Conn) ([]byte, msg) {
 
 		if _, ok := clientMsg.Data.(map[string]interface{})["image_url"]; ok {
 			// 存在图片
-			models.SaveContent(map[string]interface{}{
+			message := map[string]interface{}{
 				"user_id":    intUid,
 				"to_user_id": toUid,
 				"content":    data["content"],
 				"room_id":    data["room_id"],
 				"image_url":  clientMsg.Data.(map[string]interface{})["image_url"].(string),
-			})
+			}
+			logrus.Info(message)
 		} else {
-			models.SaveContent(map[string]interface{}{
+			message := map[string]interface{}{
 				"user_id":    intUid,
 				"to_user_id": toUid,
 				"room_id":    data["room_id"],
 				"content":    data["content"],
-			})
+			}
+			logrus.Info(message)
 		}
 
 	}

@@ -8,30 +8,36 @@ import (
 	"net/http"
 )
 
-func SaveAuthSession(c *gin.Context, info interface{}) { // info不能为struct
+func SaveAuthSession(c *gin.Context, user interface{}) { // info不能为struct
 	session := sessions.Default(c)
-	session.Set("uid", info)
+	session.Set("uid", user)
 	err := session.Save()
 	if err != nil {
 		logrus.WithField("[SaveAuthSession]:", err).Info(err)
 	}
 }
 
-func GetSessionUserInfo(c *gin.Context) *model.User {
+func GetSessionUserInfo(c *gin.Context) map[string]interface{} {
 	session := sessions.Default(c)
 
 	uid := session.Get("uid")
 	user, ok := uid.(model.User)
+	data := make(map[string]interface{})
 	if !ok {
 		return nil
 	}
-	return &user
+	data["uid"] = user.ID
+	data["username"] = user.Username
+	data["avatar_id"] = user.AvatarId
+	return data
 }
 
 func ClearAuthSession(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
-	session.Save()
+	if err := session.Save(); err != nil {
+		logrus.WithField("ClearAuthSession", "失败").Error(err)
+	}
 }
 
 func HasSession(c *gin.Context) bool {
