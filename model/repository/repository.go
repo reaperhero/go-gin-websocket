@@ -16,7 +16,9 @@ var (
 type Repository interface {
 	SaveUser(username, password, avatarId string) error
 	FindUserById(username string) model.User
-	GetMessageByRoomId(roomId string, offset int) []interface{}
+	GetMessageByRoomId(roomId string, offset int) []map[string]interface{}
+	SaveMessageContent(content map[string]interface{}) error
+	GetLimitPrivateMsg(uid, toUId string, offset int) []map[string]interface{}
 }
 
 type dbRepository struct {

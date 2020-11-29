@@ -18,14 +18,9 @@ func SaveAuthSession(c *gin.Context, user interface{}) { // info不能为struct
 }
 
 func GetSessionUserInfo(c *gin.Context) map[string]interface{} {
-	session := sessions.Default(c)
-
-	uid := session.Get("uid")
-	user, ok := uid.(model.User)
+	uid := sessions.Default(c).Get("uid")
+	user, _ := uid.(model.User)
 	data := make(map[string]interface{})
-	if !ok {
-		return nil
-	}
 	data["uid"] = user.ID
 	data["username"] = user.Username
 	data["avatar_id"] = user.AvatarId

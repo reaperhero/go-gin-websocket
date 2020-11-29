@@ -12,7 +12,7 @@ import (
 func (h *handler) index(c *gin.Context) {
 	userinfo := middleware.GetSessionUserInfo(c)
 	if userinfo != nil {
-		c.Redirect(http.StatusFound, "/user/home")
+		c.Redirect(http.StatusFound, "/home")
 		return
 	}
 	c.HTML(http.StatusOK, "login.html", gin.H{
@@ -58,7 +58,12 @@ func (h *handler) userRegister(c *gin.Context) {
 }
 
 func (h *handler) userLogin(c *gin.Context) {
-	var u model.User
+	var u = struct {
+		Username string `form:"username" binding:"required,max=16,min=2"`
+		Password string `form:"password" binding:"required,max=32,min=6"`
+		AvatarId string `form:"avatar_id" binding:"required,numeric"`
+	}{}
+
 	if err := c.ShouldBind(&u); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1001, "msg": err.Error()})
 		return
@@ -72,7 +77,7 @@ func (h *handler) userLogin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1003, "msg": "密码错误"})
 		return
 	}
-	middleware.SaveAuthSession(c, u)
+	middleware.SaveAuthSession(c, user)
 	c.JSON(http.StatusOK, gin.H{"code": 1000, "msg": "登陆成功"})
 	return
 }
@@ -90,11 +95,29 @@ func (h *handler) room(c *gin.Context) {
 	for i, i2 := range messageList {
 		logrus.Println(i, i2)
 	}
-	c.JSON(200, messageList)
-	return
 	c.HTML(http.StatusOK, "room.html", gin.H{
-		"user_info":   userInfo,
-		"room_id":     roomId,
-		"messagelist": messageList,
+		"user_info": userInfo,
+		"user_id":   2,
+		"room_id":   roomId,
+		"msg_list":  messageList,
 	})
+}
+
+func (h *handler) wsHandler(c *gin.Context) {
+	wsUpgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	wsContext, _ := wsUpgrader.Upgrade(c.Writer, c.Request, nil)
+	defer wsContext.Close()
+
+	go handleRead(wsContext)
+	go handleWrite()
+
+	select {}
+}
+
+func (h *handler) privateChat(c *gin.Context) {
+
+}
+
+func (h *handler) pagination(context *gin.Context) {
+
 }

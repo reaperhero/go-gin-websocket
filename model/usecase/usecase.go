@@ -8,7 +8,8 @@ import (
 type Usecase interface {
 	SaveUser(user model.User) error
 	FindUserByName(username string) model.User
-	GetMessageByRoomId(roomId string) []interface{}
+	GetMessageByRoomId(roomId string) []map[string]interface{}
+	SaveMessageContent(message map[string]interface{})
 }
 
 type useacse struct {

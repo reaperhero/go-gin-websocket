@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>聊天室</title>
+    <title>go-gin-chat 聊天室</title>
     <link rel="stylesheet" href="//cdn.staticfile.org/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/stylesheets/style.css">
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <script type="text/javascript" src="//cdn.staticfile.org/jquery/1.11.2/jquery.min.js"></script>
     <script type="text/javascript" src="/static/rolling/js/rolling.js"></script>
 </head>
@@ -14,7 +14,7 @@
 <div class="scrollbar-macosx">
     <div class="main container ">
         <div class="jumbotron">
-            <h3>欢迎来到 reaperhero 聊天室，请先登录</h3>
+            <h3>欢迎来到 go-gin-chat 聊天室，请先登录</h3>
             <p class="user_portrait">
                 <img portrait_id="1" src="/static/images/user/1.png" alt="portrait_1">
             </p>
@@ -39,10 +39,7 @@
                 <input type="password" class="form-control" placeholder="密码，不少于6位" required>
 
                 <button id="login" class="btn btn-default" type="submit">
-                    <span class="">登录</span>
-                </button>
-                <button id="register" class="btn btn-default" type="submit">
-                    <span class="">注册</span>
+                    <span class="">登录/注册</span>
                 </button>
             </div>
         </div>
@@ -54,16 +51,16 @@
 </body>
 <script>
 
-    $(document).ready(function () {
+    $(document).ready(function(){
 
-        $('.select_portrait img').hover(function () {
+        $('.select_portrait img').hover(function() {
             var portrait_id = $(this).attr('portrait_id');
             $('.user_portrait img').attr('src', '/static/images/user/' + portrait_id + '.png');
-        }, function () {
+        }, function() {
             var t_id = $('.user_portrait img').attr('portrait_id');
             $('.user_portrait img').attr('src', '/static/images/user/' + t_id + '.png');
         });
-        $('.select_portrait img').click(function (event) {
+        $('.select_portrait img').click(function(event) {
             var portrait_id = $(this).attr('portrait_id');
             $('.user_portrait img').attr('portrait_id', portrait_id);
             $('.select_portrait img').removeClass('t');
@@ -77,28 +74,7 @@
 
             let avatar_id = $('.user_portrait img').attr('portrait_id'); // 用户头像id
 
-            $.post("/user/login", {
-                username: userName,
-                password: pwd,
-                avatar_id: avatar_id
-            }, function (res) {
-
-                if (res.code != 1000) {
-                    console.log(res.msg);
-                    return false;
-                }
-                window.location.assign("/user/home");
-            });
-        });
-
-        $('#register').click(function (event) {
-
-            let userName = $('.login input[type=text]').val(); // 用户昵称
-            let pwd = $('.login input[type=password]').val(); // 用户昵称
-
-            let avatar_id = $('.user_portrait img').attr('portrait_id'); // 用户头像id
-
-            $.post("/user/register", {
+            $.post("/login", {
                 username: userName,
                 password: pwd,
                 avatar_id: avatar_id
@@ -107,13 +83,14 @@
                     console.log(res.msg);
                     return false;
                 }
+                window.location.assign("/home");
             });
         });
     })
 
     // 回车键登录
-    $(document).keyup(function (event) {
-        if (event.keyCode === 13) {
+    $(document).keyup(function(event){
+        if(event.keyCode === 13){
             $("#login").trigger("click");
         }
     });

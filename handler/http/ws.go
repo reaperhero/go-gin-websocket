@@ -2,11 +2,9 @@ package http
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"log"
-	"net/http"
 	"strconv"
 	"sync"
 	"time"
@@ -45,17 +43,6 @@ const msgTypeGetOnlineUser = 4 // 获取用户列表
 const msgTypePrivateChat = 5   // 私聊
 const roomCount = 6            // 房间总数
 
-func (h *handler) wsHandler(c *gin.Context) {
-	wsUpgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	wsContext, _ := wsUpgrader.Upgrade(c.Writer, c.Request, nil)
-	defer wsContext.Close()
-
-	go handleRead(wsContext)
-	go handleWrite()
-
-	select {}
-}
-
 func handleRead(c *websocket.Conn) {
 
 	defer func() {
@@ -66,7 +53,6 @@ func handleRead(c *websocket.Conn) {
 
 	for {
 		_, message, err := c.ReadMessage()
-		//logrus.Println("client message", string(message),c.RemoteAddr())
 		if err != nil { // 离线通知
 			offline <- c
 			logrus.Println("ReadMessage error1", err)
@@ -106,7 +92,7 @@ func handleWrite() {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("[handleWrite]", err)
+			log.Println("[ws.handleWrite]", err)
 		}
 	}()
 
@@ -251,6 +237,7 @@ func formatServeMsgStr(status int, conn *websocket.Conn) ([]byte, msg) {
 				"room_id":    data["room_id"],
 				"image_url":  clientMsg.Data.(map[string]interface{})["image_url"].(string),
 			}
+
 			logrus.Info(message)
 		} else {
 			message := map[string]interface{}{

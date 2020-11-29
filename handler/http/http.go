@@ -33,15 +33,17 @@ func RegisterHttpHandler(engine *gin.Engine, usecase usecase.Usecase) {
 	home := engine.Group("/")
 	{
 		home.GET("/", handler.index)
-		home.POST("/user/register", handler.userRegister)
-		home.POST("/user/login", handler.userLogin)
+		home.POST("/register", handler.userRegister)
+		home.POST("/login", handler.userLogin)
+	}
 
-		user := home.Group("/user", middleware.AuthSessionMiddle())
-		{
-			user.GET("/logout", handler.userLogout)
-			user.GET("/home", handler.home)
-			user.GET("/room/:room_id", handler.room)
-			home.GET("/ws", handler.wsHandler)
-		}
+	authorized := engine.Group("/", middleware.AuthSessionMiddle())
+	{
+		authorized.GET("/logout", handler.userLogout)
+		authorized.GET("/home", handler.home)
+		authorized.GET("/room/:room_id", handler.room)
+		authorized.GET("/private-chat", handler.privateChat)
+		authorized.GET("/ws", handler.wsHandler)
+		authorized.GET("/pagination", handler.pagination)
 	}
 }
