@@ -30,6 +30,7 @@ func (u *useacse) GetMessageByRoomId(roomId string) []map[string]interface{} {
 }
 
 func (u *useacse) SaveMessageContent(message map[string]interface{}) {
+
 	err := u.repo.SaveMessageContent(message)
 	if err != nil {
 		logrus.Println("[useacse.GetMessageByRoomId]", err)

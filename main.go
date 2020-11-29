@@ -15,6 +15,7 @@ func init() {
 func main() {
 	repo := repository.NewRepository()
 	usecase := usecase.NewUsecase(repo)
+	http.Usecase = usecase
 	httpRun(usecase)
 }
 

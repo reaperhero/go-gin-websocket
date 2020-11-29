@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
+	"github.com/reaperhero/go-gin-websocket/model/usecase"
 	"github.com/sirupsen/logrus"
 	"log"
 	"strconv"
@@ -34,6 +35,7 @@ var (
 	sMsg       = make(chan msg)
 	offline    = make(chan *websocket.Conn)
 	chNotify   = make(chan int, 1)
+	Usecase    usecase.Usecase
 )
 
 const msgTypeOnline = 1        // 上线
@@ -220,15 +222,13 @@ func formatServeMsgStr(status int, conn *websocket.Conn) ([]byte, msg) {
 		data["avatar_id"] = clientMsg.Data.(map[string]interface{})["avatar_id"].(string)
 		data["content"] = clientMsg.Data.(map[string]interface{})["content"].(string)
 
-		toUidStr := clientMsg.Data.(map[string]interface{})["to_uid"].(string)
-		toUid, _ := strconv.Atoi(toUidStr)
+		toUid, _ := strconv.Atoi(clientMsg.Data.(map[string]interface{})["to_uid"].(string))
 
 		// 保存消息
 		stringUid := strconv.FormatFloat(data["uid"].(float64), 'f', -1, 64)
 		intUid, _ := strconv.Atoi(stringUid)
 
 		if _, ok := clientMsg.Data.(map[string]interface{})["image_url"]; ok {
-			// 存在图片
 			message := map[string]interface{}{
 				"user_id":    intUid,
 				"to_user_id": toUid,
@@ -236,15 +236,16 @@ func formatServeMsgStr(status int, conn *websocket.Conn) ([]byte, msg) {
 				"room_id":    data["room_id"],
 				"image_url":  clientMsg.Data.(map[string]interface{})["image_url"].(string),
 			}
-
+			Usecase.SaveMessageContent(message)
 			logrus.Info(message)
 		} else {
 			message := map[string]interface{}{
 				"user_id":    intUid,
 				"to_user_id": toUid,
-				"room_id":    data["room_id"],
 				"content":    data["content"],
+				"room_id":    data["room_id"],
 			}
+			Usecase.SaveMessageContent(message)
 			logrus.Info(message)
 		}
 

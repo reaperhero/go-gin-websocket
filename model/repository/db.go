@@ -73,9 +73,13 @@ func (db *dbRepository) SaveMessageContent(content map[string]interface{}) error
 	to_userId := content["to_user_id"].(int)
 	text := content["content"].(string)
 	room_id, _ := strconv.Atoi(content["room_id"].(string))
-	imageUrl := content["image_url"].(string)
+	imageUrl, ok := content["image_url"].(string)
+	if !ok {
+		imageUrl = ""
+	}
 	sql := "insert into messages(`user_id`,`room_id`,`to_user_id`,`content`,`image_url`) values(?,?,?,?,?)"
 	result, err := db.repo.Exec(sql, userId, room_id, to_userId, text, imageUrl)
-	logrus.Info(result.LastInsertId())
+	id, _ := result.LastInsertId()
+	logrus.Info("[dbRepository.SaveMessageContent] success ", id)
 	return err
 }
