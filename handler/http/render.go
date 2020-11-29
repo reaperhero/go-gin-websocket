@@ -5,8 +5,8 @@ import (
 	"github.com/reaperhero/go-gin-websocket/middleware"
 	"github.com/reaperhero/go-gin-websocket/model"
 	"github.com/reaperhero/go-gin-websocket/utils"
-	"github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 )
 
 func (h *handler) index(c *gin.Context) {
@@ -92,9 +92,6 @@ func (h *handler) room(c *gin.Context) {
 	roomId := c.Param("room_id")
 	userInfo := middleware.GetSessionUserInfo(c)
 	messageList := h.usecase.GetMessageByRoomId(roomId)
-	for i, i2 := range messageList {
-		logrus.Println(i, i2)
-	}
 	c.HTML(http.StatusOK, "room.html", gin.H{
 		"user_info": userInfo,
 		"user_id":   2,
@@ -115,6 +112,16 @@ func (h *handler) wsHandler(c *gin.Context) {
 }
 
 func (h *handler) privateChat(c *gin.Context) {
+	roomId := c.Query("room_id")
+	toUid := c.Query("uid")
+	userInfo := middleware.GetSessionUserInfo(c)
+	uid := strconv.Itoa(int(userInfo["uid"].(uint)))
+	msgList := h.usecase.GetLimitPrivateMsg(uid, toUid)
+	c.HTML(http.StatusOK, "private_chat.html", gin.H{
+		"user_info": userInfo,
+		"msg_list":  msgList,
+		"room_id":   roomId,
+	})
 
 }
 

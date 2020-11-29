@@ -39,7 +39,10 @@
                 <input type="password" class="form-control" placeholder="密码，不少于6位" required>
 
                 <button id="login" class="btn btn-default" type="submit">
-                    <span class="">登录/注册</span>
+                    <span class="">登录</span>
+                </button>
+                <button id="register" class="btn btn-default" type="submit">
+                    <span class="">注册</span>
                 </button>
             </div>
         </div>
@@ -75,6 +78,26 @@
             let avatar_id = $('.user_portrait img').attr('portrait_id'); // 用户头像id
 
             $.post("/login", {
+                username: userName,
+                password: pwd,
+                avatar_id: avatar_id
+            }, function (res) {
+                if (res.code != 1000) {
+                    console.log(res.msg);
+                    return false;
+                }
+                window.location.assign("/home");
+            });
+        });
+
+        $('#register').click(function (event) {
+
+            let userName = $('.login input[type=text]').val(); // 用户昵称
+            let pwd = $('.login input[type=password]').val(); // 用户昵称
+
+            let avatar_id = $('.user_portrait img').attr('portrait_id'); // 用户头像id
+
+            $.post("/register", {
                 username: userName,
                 password: pwd,
                 avatar_id: avatar_id

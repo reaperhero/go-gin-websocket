@@ -10,6 +10,7 @@ type Usecase interface {
 	FindUserByName(username string) model.User
 	GetMessageByRoomId(roomId string) []map[string]interface{}
 	SaveMessageContent(message map[string]interface{})
+	GetLimitPrivateMsg(uid, toUId string) []map[string]interface{}
 }
 
 type useacse struct {

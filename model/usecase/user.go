@@ -23,7 +23,7 @@ func (u *useacse) FindUserByName(username string) model.User {
 func (u *useacse) GetMessageByRoomId(roomId string) []map[string]interface{} {
 	list := u.repo.GetMessageByRoomId(roomId, 100)
 	if list == nil {
-		logrus.Println("[useacse.GetMessageByRoomId]", nil)
+		logrus.Warn("[useacse.GetMessageByRoomId]", nil)
 		return nil
 	}
 	return list
@@ -38,5 +38,6 @@ func (u *useacse) SaveMessageContent(message map[string]interface{}) {
 }
 
 func (u *useacse) GetLimitPrivateMsg(uid, toUId string) []map[string]interface{} {
-	return nil
+	data := u.repo.GetLimitPrivateMsg(uid, toUId, 100)
+	return data
 }

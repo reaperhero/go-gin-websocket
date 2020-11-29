@@ -29,35 +29,41 @@ func (db *dbRepository) FindUserById(username string) model.User {
 }
 
 func (db *dbRepository) GetMessageByRoomId(roomId string, offset int) []map[string]interface{} {
-	sql := "select messages.*,users.username ,users.avatar_id from messages inner join users on users.id = messages.user_id where messages.room_id = ? order by messages.id desc limit ?"
-	//result := make([]*struct {
-	//	ID        uint       `db:"id" json:"id"`
-	//	UserId    int        `db:"user_id" json:"user_id"`
-	//	ToUserId  int        `db:"to_user_id" json:"to_user_id"`
-	//	RoomId    int        `db:"room_id" json:"room_id"`
-	//	Content   string     `db:"content" json:"content"`
-	//	ImageUrl  string     `db:"image_url" json:"image_url"`
-	//	Username  string     `db:"username" json:"username"`
-	//	AvatarId  int        `db:"avatar_id" json:"avatar_id"`
-	//	CreatedAt *time.Time `db:"created_at" json:"created_at"`
-	//	UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
-	//	DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
-	//}, 0)
-	var results []map[string]interface{}
-	err := db.repo.Select(&results, sql, roomId, offset)
+	sql := "select messages.*,`users`.`username`,`users`.`avatar_id` from messages inner join users " +
+		"on users.id = messages.user_id where messages.room_id = ? order by messages.id desc limit ?"
+	rows, err := db.repo.Query(sql, roomId, offset)
 	if err != nil {
-		logrus.Println("[dbRepository.GetMessageByRoomId]", err)
 		return nil
 	}
-	return results
+	columns, _ := rows.Columns()
+	columnLength := len(columns)
+	cache := make([]interface{}, columnLength)
+	for index, _ := range cache {
+		var a interface{}
+		cache[index] = &a
+	}
+	var list []map[string]interface{}
+	for rows.Next() {
+		_ = rows.Scan(cache...)
+		item := make(map[string]interface{})
+		for i, data := range cache {
+			item[columns[i]] = *data.(*interface{})
+		}
+		list = append(list, item)
+	}
+	_ = rows.Close()
+	logrus.Info("[dbRepository.GetMessageByRoomId]", list)
+	return list
 }
 
 func (db *dbRepository) GetLimitPrivateMsg(uid, toUId string, offset int) []map[string]interface{} {
 	var results []map[string]interface{}
-	sql := "select messages.*, users.username,users.avatar_id from messages inner join users on users.id = messages.user_id where messages.user_id = ?  and messages.to_user_id= ? or messages.user_id = ? and messages.to_user_id= ? order by messages.id desc limit ?"
-	err := db.repo.Select(&results, sql, uid, toUId, offset)
+	sql := "select messages.*, users.username,users.avatar_id from messages " +
+		"inner join users on users.id = messages.user_id " +
+		"where messages.user_id = ?  and messages.to_user_id= ? or messages.user_id = ? and messages.to_user_id= ? order by messages.id desc limit ?"
+	err := db.repo.Select(&results, sql, uid, toUId, toUId, uid, offset)
 	if err != nil {
-		logrus.Info("[dbRepository.GetLimitPrivateMsg]", err)
+		logrus.Info("[dbRepository.GetLimitPrivateMsg]", err, results)
 	}
 	return results
 }

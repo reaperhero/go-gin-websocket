@@ -47,7 +47,7 @@ func handleRead(c *websocket.Conn) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Println("[handleRead] ", err)
+			logrus.Info("[handleRead,recover] ", err)
 		}
 	}()
 
@@ -55,13 +55,12 @@ func handleRead(c *websocket.Conn) {
 		_, message, err := c.ReadMessage()
 		if err != nil { // 离线通知
 			offline <- c
-			logrus.Println("ReadMessage error1", err)
 			break
 		}
 
 		serveMsgStr := message
 
-		// 处理心跳响应 , heartbeat为与客户端约定的值
+		// heartbeat
 		if string(serveMsgStr) == `heartbeat` {
 			c.WriteMessage(websocket.TextMessage, []byte(`{"status":0,"data":"heartbeat ok"}`))
 			continue
