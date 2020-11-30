@@ -58,7 +58,7 @@ func (h *handler) userRegister(c *gin.Context) {
 }
 
 func (h *handler) userLogin(c *gin.Context) {
-	var u = struct {
+	u := struct {
 		Username string `form:"username" binding:"required,max=16,min=2"`
 		Password string `form:"password" binding:"required,max=32,min=6"`
 		AvatarId string `form:"avatar_id" binding:"required,numeric"`

@@ -1,1 +1,145 @@
-!function(e,t){if("object"==typeof exports&&"object"==typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{var o=t();for(var n in o)("object"==typeof exports?exports:e)[n]=o[n]}}(window,function(){return function(e){var t={};function o(n){if(t[n])return t[n].exports;var i=t[n]={i:n,l:!1,exports:{}};return e[n].call(i.exports,i,i.exports,o),i.l=!0,i.exports}return o.m=e,o.c=t,o.d=function(e,t,n){o.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},o.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},o.t=function(e,t){if(1&t&&(e=o(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(o.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var i in e)o.d(n,i,function(t){return e[t]}.bind(null,i));return n},o.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return o.d(t,"a",t),t},o.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},o.p="",o(o.s=0)}([function(e,t,o){"use strict";function n(e){var t=e.url,o=e.pingTimeout,n=void 0===o?15e3:o,i=e.pongTimeout,r=void 0===i?1e4:i,c=e.reconnectTimeout,s=void 0===c?2e3:c,u=e.pingMsg,p=void 0===u?"heartbeat":u,f=e.repeatLimit,a=void 0===f?null:f;this.opts={url:t,pingTimeout:n,pongTimeout:r,reconnectTimeout:s,pingMsg:p,repeatLimit:a},this.ws=null,this.repeat=0,this.onclose=function(){},this.onerror=function(){},this.onopen=function(){},this.onmessage=function(){},this.onreconnect=function(){},this.createWebSocket()}Object.defineProperty(t,"__esModule",{value:!0}),n.prototype.createWebSocket=function(){try{this.ws=new WebSocket(this.opts.url),this.initEventHandle()}catch(e){throw this.reconnect(),e}},n.prototype.initEventHandle=function(){var e=this;this.ws.onclose=function(){e.onclose(),e.reconnect()},this.ws.onerror=function(){e.onerror(),e.reconnect()},this.ws.onopen=function(){e.repeat=0,e.onopen(),e.heartCheck()},this.ws.onmessage=function(t){e.onmessage(t),e.heartCheck()}},n.prototype.reconnect=function(){var e=this;this.opts.repeatLimit>0&&this.opts.repeatLimit<=this.repeat||this.lockReconnect||this.forbidReconnect||(this.lockReconnect=!0,this.repeat++,this.onreconnect(),setTimeout(function(){e.createWebSocket(),e.lockReconnect=!1},this.opts.reconnectTimeout))},n.prototype.send=function(e){this.ws.send(e)},n.prototype.heartCheck=function(){this.heartReset(),this.heartStart()},n.prototype.heartStart=function(){var e=this;this.forbidReconnect||(this.pingTimeoutId=setTimeout(function(){e.ws.send(e.opts.pingMsg),e.pongTimeoutId=setTimeout(function(){e.ws.close()},e.opts.pongTimeout)},this.opts.pingTimeout))},n.prototype.heartReset=function(){clearTimeout(this.pingTimeoutId),clearTimeout(this.pongTimeoutId)},n.prototype.close=function(){this.forbidReconnect=!0,this.heartReset(),this.ws.close()},"undefined"!=typeof window&&(window.WebsocketHeartbeatJs=n),t.default=n}])});
+!
+    function(f, c) {
+        if ("object" == typeof exports && "object" == typeof module) module.exports = c();
+        else if ("function" == typeof define && define.amd) define([], c);
+        else {
+            c = c();
+            for (var e in c)("object" == typeof exports ? exports : f)[e] = c[e]
+        }
+    }(window, function() {
+        return function(f) {
+            function c(b) {
+                if (e[b]) return e[b].exports;
+                var a = e[b] = {
+                    i: b,
+                    l: !1,
+                    exports: {}
+                };
+                return f[b].call(a.exports, a, a.exports, c), a.l = !0, a.exports
+            }
+            var e = {};
+            return c.m = f, c.c = e, c.d = function(b, a, d) {
+                c.o(b, a) || Object.defineProperty(b, a, {
+                    enumerable: !0,
+                    get: d
+                })
+            }, c.r = function(b) {
+                "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(b, Symbol.toStringTag, {
+                    value: "Module"
+                });
+                Object.defineProperty(b, "__esModule", {
+                    value: !0
+                })
+            }, c.t = function(b, a) {
+                if ((1 & a && (b = c(b)), 8 & a) || 4 & a && "object" == typeof b && b && b.__esModule) return b;
+                var d = Object.create(null);
+                if (c.r(d), Object.defineProperty(d, "default", {
+                    enumerable: !0,
+                    value: b
+                }), 2 & a && "string" != typeof b) for (var g in b) c.d(d, g, function(h) {
+                    return b[h]
+                }.bind(null, g));
+                return d
+            }, c.n = function(b) {
+                var a = b && b.__esModule ?
+                    function() {
+                        return b.
+                            default
+                    } : function() {
+                        return b
+                    };
+                return c.d(a, "a", a), a
+            }, c.o = function(b, a) {
+                return Object.prototype.hasOwnProperty.call(b, a)
+            }, c.p = "", c(c.s = 0)
+        }([function(f, c, e) {
+            function b(a) {
+                var d = a.pingTimeout,
+                    g = a.pongTimeout,
+                    h = a.reconnectTimeout,
+                    k = a.pingMsg,
+                    l = a.repeatLimit;
+                this.opts = {
+                    url: a.url,
+                    pingTimeout: void 0 === d ? 15E3 : d,
+                    pongTimeout: void 0 === g ? 1E4 : g,
+                    reconnectTimeout: void 0 === h ? 2E3 : h,
+                    pingMsg: void 0 === k ? "heartbeat" : k,
+                    repeatLimit: void 0 === l ? null : l
+                };
+                this.ws = null;
+                this.repeat = 0;
+                this.onclose = function() {};
+                this.onerror = function() {};
+                this.onopen = function() {};
+                this.onmessage = function() {};
+                this.onreconnect = function() {};
+                this.createWebSocket()
+            }
+            Object.defineProperty(c, "__esModule", {
+                value: !0
+            });
+            b.prototype.createWebSocket = function() {
+                try {
+                    this.ws = new WebSocket(this.opts.url), this.initEventHandle()
+                } catch (a) {
+                    throw this.reconnect(), a;
+                }
+            };
+            b.prototype.initEventHandle = function() {
+                var a = this;
+                this.ws.onclose = function() {
+                    a.onclose();
+                    a.reconnect()
+                };
+                this.ws.onerror = function() {
+                    a.onerror();
+                    a.reconnect()
+                };
+                this.ws.onopen = function() {
+                    a.repeat = 0;
+                    a.onopen();
+                    a.heartCheck()
+                };
+                this.ws.onmessage = function(d) {
+                    a.onmessage(d);
+                    a.heartCheck()
+                }
+            };
+            b.prototype.reconnect = function() {
+                var a = this;
+                0 < this.opts.repeatLimit && this.opts.repeatLimit <= this.repeat || this.lockReconnect || this.forbidReconnect || (this.lockReconnect = !0, this.repeat++, this.onreconnect(), setTimeout(function() {
+                    a.createWebSocket();
+                    a.lockReconnect = !1
+                }, this.opts.reconnectTimeout))
+            };
+            b.prototype.send = function(a) {
+                this.ws.send(a)
+            };
+            b.prototype.heartCheck = function() {
+                this.heartReset();
+                this.heartStart()
+            };
+            b.prototype.heartStart = function() {
+                var a = this;
+                this.forbidReconnect || (this.pingTimeoutId = setTimeout(function() {
+                    a.ws.send(a.opts.pingMsg);
+                    a.pongTimeoutId = setTimeout(function() {
+                        a.ws.close()
+                    }, a.opts.pongTimeout)
+                }, this.opts.pingTimeout))
+            };
+            b.prototype.heartReset = function() {
+                clearTimeout(this.pingTimeoutId);
+                clearTimeout(this.pongTimeoutId)
+            };
+            b.prototype.close = function() {
+                this.forbidReconnect = !0;
+                this.heartReset();
+                this.ws.close()
+            };
+            "undefined" != typeof window && (window.WebsocketHeartbeatJs = b);
+            c.
+                default = b
+        }])
+    });
